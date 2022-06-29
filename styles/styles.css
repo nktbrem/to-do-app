@@ -1,0 +1,109 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+@font-face {
+    font-family: Inter-Regular;
+    src: url(../fonts/Inter-Regular.ttf);
+}
+
+@font-face {
+    font-family: Inter-Bold;
+    src: url(../fonts/Inter-Bold.ttf);
+    font-weight: bold;
+}
+
+:root {
+    --main-clr: #8667E2;
+    --secondary-clr: #E0E7FF;
+}
+
+body {
+    font-family: Inter-Regular;
+}
+
+svg,
+img {
+    display: block;
+}
+
+input {
+    width: 100%;
+    padding: 16px;
+}
+
+.title {
+    font-family: Inter-Bold;
+    text-align: center;
+    color: var(--main-clr);
+}
+
+.container {
+    max-width: 1476px;
+    padding-left: 16px;
+    padding-right: 16px;
+    margin: 0 auto;
+}
+
+.card {
+    border: 1px solid;
+    border-radius: 6px;
+    margin-top: 16px;
+}
+
+.card--important {
+    background-color: #f6ff96;
+}
+
+.card-create-container {
+    position: relative;
+}
+
+.is-invalid {
+    box-shadow: 0 0 3px #CC0000;
+}
+
+.button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    margin: 0;
+    padding: 0;
+}
+
+
+.button-create {
+    position: absolute;
+    right: 16px;
+    top: 8px;
+}
+
+.controls-container {
+    display: flex;
+    gap: 32px;
+}
+
+/* .form-check-label {
+    cursor: pointer;
+}
+
+.checkbox {
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+    position: absolute;
+}
+
+.checkbox-label {
+    transition: 0.5s ease;
+}
+
+.checkbox-label:hover {
+    fill: red;
+} */
