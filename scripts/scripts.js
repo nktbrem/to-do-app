@@ -60,6 +60,12 @@
         }
 
         _attachEvents() {
+            this._nameField.addEventListener('keypress', (event) => {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    this._formAction();
+                }
+            });
             this.formButton.addEventListener('click', () => {
                 //arrow function deosn't have own 'this' it will inherit it from it's parent App
                 //another option  formButton.addEventListener('click', this._formAction.bind(this))
@@ -80,9 +86,23 @@
             this._cardsContainer = createElement({ classes: ['container'] });
             let cardCreateContainer = createElement({ classes: ['card-create-container'] });
 
+            this._doneCardsContainer = createElement({ classes: ['container'] });
+            let doneCardsTitle = createElement({ tagName: 'h2', classes: ['title'], textContent: 'finished tasks' });
+
             cardCreateContainer.append(this._nameField, this.formButton);
-            appBlock.append(title, cardCreateContainer, this._cardsContainer);
+            this._doneCardsContainer.append(doneCardsTitle);
+            appBlock.append(title, cardCreateContainer, this._cardsContainer, this._doneCardsContainer);
             this._body.append(appBlock);
+
+        }
+
+        _doneCard(card) {
+
+            let doneCard = new Card({ cardTitle: card.title, isDone: card.isDone, isImportant: card.isImportant });
+            // if (doneCard.isDone === true) {
+            this._doneCardsContainer.append(doneCard.element);
+            // _updateLSByCard(doneCard);
+            // }
 
         }
 
@@ -92,11 +112,17 @@
             if (cardsJSON) {
                 let cardsData = JSON.parse(cardsJSON);
                 this.cardsArr = cardsData.map(cardData => {
-                    return new Card({ cardTitle: cardData.title, isImportant: cardData.importance })
+                    return new Card({ cardTitle: cardData.title, isDone: cardData.isDone, isImportant: cardData.isImportant })
                 });
 
                 this.cardsArr.forEach(card => {
-                    this._cardsContainer.append(card.element);
+                    if (card.isDone === true) {
+                        console.log(card);
+                        this._doneCardsContainer.append(card.element);
+                    } else {
+                        console.log(card);
+                        this._cardsContainer.append(card.element);
+                    }
                 })
             }
         }
@@ -147,12 +173,19 @@
             let cardsStates = this.cardsArr.map(card => {
                 return {
                     title: card.title,
-                    importance: card.isImportant,
+                    isDone: card.isDone,
+                    isImportant: card.isImportant
                 }
             })
 
             this._LS.setItem('cards', JSON.stringify(cardsStates));
         }
+        // _updateLSByCard(card) {
+
+        //     //map() creates a new array populated with the results of calling a provided function on every element in the calling array
+
+        //     this._LS.setItem('cards', JSON.stringify(card));
+        // }
 
 
         deleteCard(card) {
@@ -173,8 +206,8 @@
             console.log(app);
         }
 
-        updateCard(card, importanceChange) {
-            if (importanceChange) {
+        updateCard(card, checkboxChange) {
+            if (checkboxChange) {
                 this._updateLS();
                 return;
             }
@@ -191,8 +224,9 @@
 
 
     class Card {
-        constructor({ cardTitle = '', isImportant = false }) {
+        constructor({ cardTitle = '', isDone = false, isImportant = false }) {
             this.title = cardTitle;
+            this.isDone = isDone;
             this.isImportant = isImportant;
 
             this._init();
@@ -226,11 +260,24 @@
             }
 
             let importanceCheckboxLabel = createElement({ tagName: 'label', classes: ['form-check-label'], textContent: 'Important', attributes: { for: 'importanceCheckbox' } });
-            // this._importanceCheckboxLabel.innerHTML = `<svg width="10" height="36" viewBox="0 0 10 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+            this._doneCheckbox = createElement({ tagName: 'input', classes: ['checkbox'], attributes: { type: 'checkbox', id: 'doneCheckbox' } });
+            if (this.isDone) {
+                this._doneCheckbox.setAttribute('checked', 'checked');
+                this._editButton.disabled = 'disabled';
+                this._importanceCheckbox.disabled = 'disabled';
+                this._doneCheckbox.disabled = 'disabled';
+                // cardElement.classList.add('card--important');
+            } else {
+                // cardElement.classList.remove('card--important');
+            }
+
+            let doneCheckboxLabel = createElement({ tagName: 'label', classes: ['form-check-label'], textContent: 'Done', attributes: { for: 'doneCheckbox' } });
+            // this._doneCheckboxLabel.innerHTML = `<svg width="10" height="36" viewBox="0 0 10 36" fill="none" xmlns="http://www.w3.org/2000/svg">
             // <path class = "checkbox-label" d="M5 0C2.3136 0 0.205755 2.30442 0.444662 4.98019L2.27767 25.5099C2.40354 26.9196 3.58472 28 5 28C6.41529 28 7.59647 26.9196 7.72233 25.5099L9.55534 4.98019C9.79425 2.30443 7.68641 0 5 0ZM5 36C6.65686 36 8 34.6569 8 33C8 31.3431 6.65686 30 5 30C3.34315 30 2 31.3431 2 33C2 34.6569 3.34315 36 5 36Z" fill="black"/>
             // </svg>`;
 
-            controlsContainer.append(this._editButton, this._deleteButton, this._importanceCheckbox, importanceCheckboxLabel);
+            controlsContainer.append(this._editButton, this._deleteButton, this._doneCheckbox, doneCheckboxLabel, this._importanceCheckbox, importanceCheckboxLabel);
             cardElement.append(this._titleElement, controlsContainer);
 
             return cardElement;
@@ -241,7 +288,19 @@
                 this._deleteCard();
             })
             this._editButton.addEventListener('click', () => {
+                document.querySelector('.name-input').focus();
                 app.updateCard(this);
+            })
+            this._doneCheckbox.addEventListener('change', () => {
+                this.isDone = this._doneCheckbox.checked;
+                app.updateCard(this, true);
+                if (this.isDone) {
+                    // this.element.classList.add('card--important');
+                    app._doneCard(this);
+                    this.element.remove();
+                } else {
+                    // this.element.classList.add('card--important');
+                }
             })
             this._importanceCheckbox.addEventListener('change', () => {
                 this.isImportant = this._importanceCheckbox.checked;
@@ -249,7 +308,7 @@
                 if (this.isImportant) {
                     this.element.classList.add('card--important');
                 } else {
-                    this.element.classList.add('card--important');
+                    this.element.classList.remove('card--important');
                 }
             })
         }
@@ -267,6 +326,6 @@
 
 
     let app = new App();
- 
+
 
 }());
